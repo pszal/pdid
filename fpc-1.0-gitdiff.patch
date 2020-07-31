@@ -1,0 +1,96 @@
+diff --git a/ecc_enclave/enclave/enclave.edl b/ecc_enclave/enclave/enclave.edl
+index 93372e2..6a039a9 100644
+--- a/ecc_enclave/enclave/enclave.edl
++++ b/ecc_enclave/enclave/enclave.edl
+@@ -52,6 +52,7 @@ enclave {
+                 [out, size=max_len] uint8_t *values, uint32_t max_len, [out] uint32_t *values_len,
+                 [in, out] sgx_cmac_128bit_tag_t *cmac,
+                 [user_check] void *u_shim_ctx);
++        void ocall_get_time_ms([out]double *t);
+     };
+ 
+ };
+diff --git a/ecc_enclave/enclave/shim.cpp b/ecc_enclave/enclave/shim.cpp
+index b873316..14d7999 100644
+--- a/ecc_enclave/enclave/shim.cpp
++++ b/ecc_enclave/enclave/shim.cpp
+@@ -296,3 +296,9 @@ int get_func_and_params(
+     json_value_free(root);
+     return 1;
+ }
++
++double get_time_ms(void){
++    double t;
++    ocall_get_time_ms(&t);
++    return t;
++}
+diff --git a/ecc_enclave/enclave/shim.h b/ecc_enclave/enclave/shim.h
+index f8b1f52..229658d 100644
+--- a/ecc_enclave/enclave/shim.h
++++ b/ecc_enclave/enclave/shim.h
+@@ -255,3 +255,5 @@ void log_debug(const char* format, ...);
+ //     that should be handled on the implementation side hiden from the API here
+ //
+ // TODO: implemented above once questions are resolved and API is agreed ..
++
++double get_time_ms(void);
+diff --git a/ecc_enclave/sgxcclib/sgxcclib.c b/ecc_enclave/sgxcclib/sgxcclib.c
+index 6ba94f9..54cbad8 100644
+--- a/ecc_enclave/sgxcclib/sgxcclib.c
++++ b/ecc_enclave/sgxcclib/sgxcclib.c
+@@ -11,6 +11,7 @@
+ 
+ #include <stdbool.h>
+ #include <string.h>
++#include <time.h>
+ 
+ // for RA:
+ #include "sgx_quote.h"
+@@ -128,3 +129,8 @@ void ocall_print_string(const char* str)
+ {
+     golog(str);
+ }
++
++void ocall_get_time_ms(double *t)
++{
++    *t = (double)clock() / (CLOCKS_PER_SEC/1000);
++}
+diff --git a/integration/config/core.yaml b/integration/config/core.yaml
+index 0fab744..c1ce153 100644
+--- a/integration/config/core.yaml
++++ b/integration/config/core.yaml
+@@ -498,7 +498,7 @@ chaincode:
+         name:
+ 
+     # Generic builder environment, suitable for most chaincode types
+-    builder: $(DOCKER_NS)/fabric-ccenv:latest
++    builder: $(DOCKER_NS)/fabric-ccenv:2.1
+ 
+     # Enables/disables force pulling of the base docker images (listed below)
+     # during user chaincode instantiation.
+diff --git a/utils/docker-compose/network-config/core-fpc.yaml b/utils/docker-compose/network-config/core-fpc.yaml
+index 19c3c4b..66023d5 100644
+--- a/utils/docker-compose/network-config/core-fpc.yaml
++++ b/utils/docker-compose/network-config/core-fpc.yaml
+@@ -498,7 +498,7 @@ chaincode:
+         name:
+ 
+     # Generic builder environment, suitable for most chaincode types
+-    builder: $(DOCKER_NS)/fabric-ccenv:latest
++    builder: $(DOCKER_NS)/fabric-ccenv:2.1
+ 
+     # Enables/disables force pulling of the base docker images (listed below)
+     # during user chaincode instantiation.
+diff --git a/utils/docker-compose/network-config/core.yaml b/utils/docker-compose/network-config/core.yaml
+index 7575190..5b94827 100644
+--- a/utils/docker-compose/network-config/core.yaml
++++ b/utils/docker-compose/network-config/core.yaml
+@@ -481,7 +481,7 @@ chaincode:
+         name:
+ 
+     # Generic builder environment, suitable for most chaincode types
+-    builder: $(DOCKER_NS)/fabric-ccenv:latest
++    builder: $(DOCKER_NS)/fabric-ccenv:2.1
+ 
+     # Enables/disables force pulling of the base docker images (listed below)
+     # during user chaincode instantiation.
