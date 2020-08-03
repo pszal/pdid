@@ -3,7 +3,7 @@
 PDIDs are human-meaningful, globally unique, and decentralized identities,
 which are securely authenticated with passwords.  The technical details of PDIDs
 are presented in 
-[*P.Szalachowski, "Password-authenticated Decentralized Identities", 2020*]()
+[*P.Szalachowski, "Password-authenticated Decentralized Identities", 2020*](https://arxiv.org/pdf/2007.15881.pdf)
 
 This repository contains a proof-of-concept PDIDs implementation, intended **for demonstration purposes only**.
 
